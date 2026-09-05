@@ -2,9 +2,9 @@ import { getRouteApi, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
+import { apiFetch } from "@/lib/api";
 
 const route = getRouteApi("/verify-email");
-const API_URL = import.meta.env["VITE_API_URL"] ?? "http://localhost:4000";
 
 type Status = "checking" | "verified" | "invalid";
 
@@ -20,7 +20,7 @@ export function VerifyEmailPage() {
       setStatus("invalid");
       return;
     }
-    fetch(`${API_URL}/api/auth/verify-email`, {
+    apiFetch("/api/auth/verify-email", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token }),

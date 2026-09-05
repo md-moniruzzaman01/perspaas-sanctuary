@@ -20,8 +20,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SanctuaryGate } from "@/components/sanctuary-gate";
 import { cn } from "@/lib/utils";
 import { type StoredAuth, clearSanctuaryAuth, readSanctuaryAuth, refreshSanctuarySession } from "@/lib/sanctuary-auth";
-
-const API_URL = import.meta.env["VITE_API_URL"] ?? "http://localhost:4000";
+import { apiFetch } from "@/lib/api";
 
 type MeResponse = {
   user: { id: string; email: string | null };
@@ -61,12 +60,18 @@ function PasswordField({
   value,
   onChange,
   disabled,
+  autoComplete = "new-password",
+  minLength = 8,
+  maxLength = 20,
 }: {
   id: string;
   placeholder: string;
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
+  autoComplete?: string;
+  minLength?: number;
+  maxLength?: number;
 }) {
   const [visible, setVisible] = useState(false);
   return (
@@ -75,8 +80,9 @@ function PasswordField({
       <input
         id={id}
         type={visible ? "text" : "password"}
-        autoComplete="new-password"
-        minLength={8}
+        autoComplete={autoComplete}
+        minLength={minLength}
+        maxLength={maxLength}
         placeholder={placeholder}
         value={value}
         disabled={disabled}
@@ -120,6 +126,7 @@ function ProfileContent() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [pwBusy, setPwBusy] = useState(false);
@@ -135,7 +142,7 @@ function ProfileContent() {
     let cancelled = false;
 
     async function authedFetch(path: string, accessToken: string): Promise<Response | null> {
-      const res = await fetch(`${API_URL}${path}`, {
+      const res = await apiFetch(path, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       if (res.status !== 401) return res;
@@ -180,7 +187,7 @@ function ProfileContent() {
     setSaved(false);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/auth/profile`, {
+      const res = await apiFetch("/api/auth/profile", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -207,8 +214,12 @@ function ProfileContent() {
     e.preventDefault();
     if (!auth || pwBusy) return;
     setPwError(null);
-    if (newPassword.length < 8) {
-      setPwError("New password must be at least 8 characters.");
+    if (!currentPassword) {
+      setPwError("Enter your current password.");
+      return;
+    }
+    if (newPassword.length < 8 || newPassword.length > 20) {
+      setPwError("New password must be between 8 and 20 characters.");
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -217,15 +228,18 @@ function ProfileContent() {
     }
     setPwBusy(true);
     try {
-      const res = await fetch(`${API_URL}/api/auth/change-password`, {
+      const res = await apiFetch("/api/auth/change-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${auth.accessToken}`,
         },
-        body: JSON.stringify({ password: newPassword }),
+        body: JSON.stringify({ currentPassword, password: newPassword }),
       });
-      if (!res.ok) throw new Error("Could not update your password.");
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(data.error ?? "Could not update your password.");
+      }
       // Backend revokes every session's refresh token on a password change,
       // this one included — the visitor has to log in again.
       setPwDone(true);
@@ -395,7 +409,19 @@ function ProfileContent() {
 
             {!pwDone && (
               <form className="mt-5 space-y-4" onSubmit={changePassword}>
-                <Field label="New password" htmlFor="profile-new-password" hint="At least 8 characters.">
+                <Field label="Current password" htmlFor="profile-current-password">
+                  <PasswordField
+                    id="profile-current-password"
+                    placeholder="••••••••"
+                    value={currentPassword}
+                    onChange={setCurrentPassword}
+                    disabled={pwBusy}
+                    autoComplete="current-password"
+                    minLength={1}
+                    maxLength={200}
+                  />
+                </Field>
+                <Field label="New password" htmlFor="profile-new-password" hint="8–20 characters.">
                   <PasswordField
                     id="profile-new-password"
                     placeholder="••••••••"

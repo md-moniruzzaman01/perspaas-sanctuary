@@ -37,15 +37,18 @@ function ProtocolsContent() {
     [query, active],
   );
 
+  // recordSession prepends, so state.sessions is already newest-first — walk it
+  // as-is. It used to be reversed here, which made this strip show the three
+  // *oldest* protocols under a "Recently Used" heading.
   const recent = useMemo(() => {
     const seen: string[] = [];
-    for (const s of [...state.sessions].reverse()) {
-      if (!seen.includes(s.protocolId) && getProtocol(s.protocolId)) seen.push(s.protocolId);
+    for (const s of state.sessions) {
+      if (!seen.includes(s.protocolId) && getProtocol(s.protocolId))
+        seen.push(s.protocolId);
       if (seen.length === 3) break;
     }
     return seen.map((id) => getProtocol(id)!);
   }, [state.sessions]);
-
 
   return (
     <div className="min-h-screen bg-background">
@@ -53,10 +56,12 @@ function ProtocolsContent() {
       <main className="mx-auto max-w-6xl px-4 py-10 sm:px-5 sm:py-16">
         <div>
           <p className="eyebrow">Protocol Selection</p>
-          <h1 className="mt-4 text-2xl font-medium tracking-tight sm:text-3xl md:text-4xl">Choose your reset.</h1>
+          <h1 className="mt-4 text-2xl font-medium tracking-tight sm:text-3xl md:text-4xl">
+            Choose your reset.
+          </h1>
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
-            Each protocol is calibrated to a specific pressure environment. Duration is fixed; outcome is
-            explicit.
+            Each protocol is calibrated to a specific pressure environment.
+            Duration is fixed; outcome is explicit.
           </p>
         </div>
 
@@ -77,8 +82,6 @@ function ProtocolsContent() {
             </div>
           </section>
         )}
-
-
 
         <div className="mt-8 flex items-center gap-3 rounded-md border border-border bg-panel px-4 py-3">
           <Search className="size-4 text-muted-foreground" aria-hidden />

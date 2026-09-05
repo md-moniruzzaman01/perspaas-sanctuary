@@ -136,7 +136,8 @@ export const protocols: Protocol[] = [
     stressLevel: "High",
     goal: "Command the room before entering it",
     outcome: "Measured pace, authoritative presence",
-    description: "Calibrates tempo and tone for governance settings where restraint reads as strength.",
+    description:
+      "Calibrates tempo and tone for governance settings where restraint reads as strength.",
     steps: [
       {
         title: "Cadence Breathing",
@@ -186,7 +187,8 @@ export const protocols: Protocol[] = [
     stressLevel: "High",
     goal: "Convert anticipation into conviction",
     outcome: "Clear narrative, unhurried delivery",
-    description: "Sharpens the opening ninety seconds, where capital decisions are informally made.",
+    description:
+      "Sharpens the opening ninety seconds, where capital decisions are informally made.",
     steps: [
       {
         title: "Energy Channelling Breath",
@@ -230,7 +232,8 @@ export const protocols: Protocol[] = [
     stressLevel: "Acute",
     goal: "Protect message discipline under scrutiny",
     outcome: "Controlled pauses, no reactive answers",
-    description: "Built for live and recorded formats where every hesitation is preserved permanently.",
+    description:
+      "Built for live and recorded formats where every hesitation is preserved permanently.",
     steps: [
       {
         title: "Silent Nasal Breathing",
@@ -274,7 +277,8 @@ export const protocols: Protocol[] = [
     stressLevel: "Acute",
     goal: "Neutralize provocation response",
     outcome: "Emotional detachment from tactics",
-    description: "For adversarial tables where the other side benefits from your escalation.",
+    description:
+      "For adversarial tables where the other side benefits from your escalation.",
     steps: [
       {
         title: "Box Breathing",
@@ -324,7 +328,8 @@ export const protocols: Protocol[] = [
     stressLevel: "Acute",
     goal: "Stabilize judgment during an active incident",
     outcome: "Sequenced thinking under compressed time",
-    description: "Deployed inside war rooms when information is incomplete and the clock is public.",
+    description:
+      "Deployed inside war rooms when information is incomplete and the clock is public.",
     steps: [
       {
         title: "Emergency Down-Regulation",
@@ -374,7 +379,8 @@ export const protocols: Protocol[] = [
     stressLevel: "Elevated",
     goal: "Separate the person from the decision",
     outcome: "Firm, humane, unambiguous delivery",
-    description: "Terminations, disputes, and counsel-adjacent conversations that must remain composed.",
+    description:
+      "Terminations, disputes, and counsel-adjacent conversations that must remain composed.",
     steps: [
       {
         title: "Settling Breath",
@@ -411,8 +417,9 @@ export const protocols: Protocol[] = [
   },
 ];
 
-
-export const categories: ProtocolCategory[] = [
+// The order categories appear as filter chips. Listing one here does not make
+// it appear — `categories` below drops any that no protocol uses.
+const CATEGORY_ORDER: ProtocolCategory[] = [
   "Meeting",
   "Negotiation",
   "Presentation",
@@ -422,6 +429,15 @@ export const categories: ProtocolCategory[] = [
   "Legal",
   "Leadership",
 ];
+
+// Derived rather than hand-maintained. The hand-written list had drifted from
+// the protocols above — "Presentation" was still listed with nothing filed
+// under it, so the chip rendered and always produced "No protocols match that
+// query." Deriving it means a category appears exactly when it has content,
+// and reappears on its own once a protocol is filed under it.
+export const categories: ProtocolCategory[] = CATEGORY_ORDER.filter(
+  (category) => protocols.some((p) => p.category === category),
+);
 
 export const getProtocol = (id: string) => protocols.find((p) => p.id === id);
 

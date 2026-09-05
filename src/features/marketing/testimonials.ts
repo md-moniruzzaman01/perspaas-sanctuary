@@ -1,6 +1,7 @@
 export const testimonials = [
   {
-    quote: "Three minutes in the stairwell changed how the second half of the board meeting went.",
+    quote:
+      "Three minutes in the stairwell changed how the second half of the board meeting went.",
     attr: "Chief Executive, listed industrials",
   },
   {

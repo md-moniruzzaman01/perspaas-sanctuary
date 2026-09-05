@@ -21,19 +21,21 @@ import { SiteFooter } from "@/components/site-footer";
 import { cn } from "@/lib/utils";
 import {
   type StoredAuth,
-  clearSanctuaryAuth,
+  signOutSanctuary,
   readSanctuaryAuth,
   refreshSanctuarySession,
   writeSanctuaryAuth,
 } from "@/lib/sanctuary-auth";
+import { apiFetch } from "@/lib/api";
 import { useSanctuaryLifetimePrice } from "../pricing/pricing.api";
-
-const API_URL = import.meta.env["VITE_API_URL"] ?? "http://localhost:4000";
 
 const route = getRouteApi("/purchase");
 
 type SubscriptionView = {
   status: string;
+  // The backend's own verdict, expiry included. Optional so a backend that
+  // predates the field still parses; see licenseActive below for the fallback.
+  active?: boolean;
   plan: string | null;
   currentPeriodEnd: string | null;
 };
@@ -98,6 +100,7 @@ function PasswordField({
   value,
   onChange,
   minLength,
+  maxLength,
 }: {
   id: string;
   autoComplete: string;
@@ -105,6 +108,7 @@ function PasswordField({
   value: string;
   onChange: (value: string) => void;
   minLength?: number;
+  maxLength?: number;
 }) {
   const [visible, setVisible] = useState(false);
   return (
@@ -118,6 +122,7 @@ function PasswordField({
         type={visible ? "text" : "password"}
         required
         minLength={minLength}
+        maxLength={maxLength}
         autoComplete={autoComplete}
         placeholder={placeholder}
         value={value}
@@ -180,28 +185,52 @@ export function PurchasePage() {
   useEffect(() => {
     if (!auth) return;
     let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
 
-    async function load(accessToken: string) {
-      const res = await fetch(`${API_URL}/api/sanctuary/subscription`, {
+    // Reads current license state; returns true once it is active/trialing
+    // so the caller can stop polling.
+    async function load(accessToken: string): Promise<boolean> {
+      const res = await apiFetch("/api/sanctuary/subscription", {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       if (res.status === 401) {
         const refreshed = await refreshSanctuarySession();
         if (!refreshed) {
           if (!cancelled) setAuth(null);
-          return;
+          return false;
         }
         if (!cancelled) setAuth(refreshed);
         return load(refreshed.accessToken);
       }
-      if (!res.ok) return;
+      if (!res.ok) return false;
       const data = (await res.json()) as { subscription?: SubscriptionView };
-      if (!cancelled && data.subscription) setSubscription(data.subscription);
+      if (cancelled || !data.subscription) return false;
+      setSubscription(data.subscription);
+      return (
+        data.subscription.status === "active" ||
+        data.subscription.status === "trialing"
+      );
     }
 
-    load(auth.accessToken).catch(() => {});
+    // Stripe confirms a one-time payment out of band via webhook, so right
+    // after returning from checkout the license can take a second or two to
+    // flip to active. Poll a few times before giving up rather than
+    // stranding a paying visitor on "no active license" until they reload
+    // the page by hand.
+    let attempt = 0;
+    const maxAttempts = checkout === "success" ? 8 : 1;
+
+    async function run(accessToken: string) {
+      attempt += 1;
+      const active = await load(accessToken).catch(() => false);
+      if (cancelled || active || attempt >= maxAttempts) return;
+      timer = setTimeout(() => run(accessToken), 2500);
+    }
+
+    run(auth.accessToken);
     return () => {
       cancelled = true;
+      if (timer) clearTimeout(timer);
     };
   }, [auth, checkout]);
 
@@ -242,6 +271,10 @@ export function PurchasePage() {
         setError("Select your gender.");
         return;
       }
+      if (password.length < 8 || password.length > 20) {
+        setError("Password must be between 8 and 20 characters.");
+        return;
+      }
       if (password !== confirmPassword) {
         setError("Passwords don't match.");
         return;
@@ -250,7 +283,7 @@ export function PurchasePage() {
 
     setBusy(true);
     try {
-      const response = await fetch(`${API_URL}/api/auth/${mode}`, {
+      const response = await apiFetch(`/api/auth/${mode}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
@@ -306,7 +339,7 @@ export function PurchasePage() {
     if (resendBusy) return;
     setResendBusy(true);
     try {
-      await fetch(`${API_URL}/api/auth/resend-confirmation`, {
+      await apiFetch("/api/auth/resend-confirmation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, app: "sanctuary" }),
@@ -324,7 +357,7 @@ export function PurchasePage() {
     setBusy(true);
     setError(null);
     try {
-      const response = await fetch(`${API_URL}/api/sanctuary/checkout`, {
+      const response = await apiFetch("/api/sanctuary/checkout", {
         method: "POST",
         headers: { Authorization: `Bearer ${auth.accessToken}` },
       });
@@ -340,13 +373,18 @@ export function PurchasePage() {
   };
 
   const signOut = () => {
-    clearSanctuaryAuth();
+    // Revokes the session server-side; storage is cleared synchronously inside.
+    void signOutSanctuary();
     setAuth(null);
     setSubscription(null);
   };
 
+  // Prefer `active`: a lapsed guest licence still reports status "active", so
+  // the status strings alone would show "License active" to someone whose
+  // access has already ended.
   const licenseActive =
-    subscription?.status === "active" || subscription?.status === "trialing";
+    subscription?.active ??
+    (subscription?.status === "active" || subscription?.status === "trialing");
 
   return (
     <div className="min-h-screen bg-background">
@@ -503,6 +541,19 @@ export function PurchasePage() {
                     </button>
                   </div>
 
+                  <div className="mb-4 flex gap-3 rounded-md border border-border px-4 py-3 text-xs text-muted-foreground">
+                    <Info
+                      className="mt-0.5 size-3.5 flex-none"
+                      aria-hidden="true"
+                    />
+                    <span>
+                      Your PersPaaS account is shared across all our products.
+                      If you already have one — from Executive Edge, for example
+                      — {mode === "login" ? "log in" : "log in instead"} with
+                      the same email and password.
+                    </span>
+                  </div>
+
                   <form
                     className="space-y-4"
                     onSubmit={(e) => {
@@ -600,9 +651,7 @@ export function PurchasePage() {
                     <Field
                       label="Password"
                       htmlFor="sanctuary-password"
-                      hint={
-                        mode === "signup" ? "At least 8 characters." : undefined
-                      }
+                      hint={mode === "signup" ? "8–20 characters." : undefined}
                     >
                       <PasswordField
                         id="sanctuary-password"
@@ -613,6 +662,7 @@ export function PurchasePage() {
                         value={password}
                         onChange={setPassword}
                         minLength={mode === "signup" ? 8 : undefined}
+                        maxLength={mode === "signup" ? 20 : undefined}
                       />
                     </Field>
 
@@ -639,6 +689,7 @@ export function PurchasePage() {
                           value={confirmPassword}
                           onChange={setConfirmPassword}
                           minLength={8}
+                          maxLength={20}
                         />
                       </Field>
                     )}

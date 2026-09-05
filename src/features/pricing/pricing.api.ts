@@ -3,8 +3,7 @@
 // dashboard's "activate price" only ever changed what Stripe charges at
 // checkout — the marketing copy used to be hardcoded separately).
 import { useEffect, useState } from "react";
-
-const API_URL = import.meta.env["VITE_API_URL"] ?? "http://localhost:4000";
+import { apiFetch } from "@/lib/api";
 
 // Shown until the fetch resolves (or if it fails) — never the source of truth.
 const FALLBACK_LIFETIME_AMOUNT = "1,200";
@@ -21,7 +20,7 @@ export function useSanctuaryLifetimePrice(): string {
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`${API_URL}/api/pricing`)
+    apiFetch("/api/pricing")
       .then((res) => (res.ok ? res.json() : null))
       .then((data: { sanctuary_lifetime?: { unitAmountCents: number | null } } | null) => {
         if (cancelled) return;

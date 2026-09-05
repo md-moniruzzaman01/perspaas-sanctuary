@@ -180,7 +180,34 @@
   *::before,
   *::after {
     animation-duration: 0.001ms !important;
+    /* Without this, a staggered entrance (animation-rise + a delay) leaves
+       elements at the `both` fill-mode's opacity:0 for the whole delay and
+       then pops them in — the one thing reduced motion is meant to prevent. */
+    animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
+}
+
+/*
+ * Ecosystem layout theme.
+ *
+ * The Overview page borrows Executive Edge's *composition* — the framed CTA
+ * panel, the navy→gold rule, the speckle, the numbered editorial split. It
+ * does NOT borrow Executive Edge's palette: doing so gave the page a
+ * navy-tinted ground (oklch 0.14 0.03 255), a different gold (hue 80 vs 86.6)
+ * and borders at twice the strength, so it visibly did not match /purchase,
+ * /protocols or any other Sanctuary page.
+ *
+ * So this class defines only the four accent variables the Overview markup
+ * references, mapped onto Sanctuary's own tokens. Everything else —
+ * background, foreground, card, border, primary, muted — is inherited from
+ * :root, which makes the page identical to its siblings by construction
+ * rather than by matching values by hand.
+ */
+.theme-edge {
+  --gold: var(--primary);
+  --navy: var(--card);
+  --navy-deep: oklch(0.168 0 0);
+  --slate-soft: oklch(0.5 0 0);
 }

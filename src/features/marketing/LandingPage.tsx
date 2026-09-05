@@ -1,5 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { Activity, AudioLines, Brain, Lock, MessageCircle, Shield, Timer } from "lucide-react";
+import {
+  Activity,
+  AudioLines,
+  Brain,
+  Lock,
+  MessageCircle,
+  Shield,
+  Timer,
+} from "lucide-react";
 import { testimonials } from "./testimonials";
 import { WHATSAPP_NUMBER, whatsAppDemoLink } from "./whatsapp-link";
 
@@ -27,7 +35,7 @@ const features = [
   {
     icon: Shield,
     title: "Privacy by design",
-    body: "No public profiles. No social layer. No mandatory accounts. Progress stays on the user's device unless your enterprise chooses otherwise.",
+    body: "No public profiles. No social layer. Completed sessions are recorded privately to each member's own account — never sold, never shared with third parties, never attributed anywhere else.",
   },
   {
     icon: MessageCircle,
@@ -42,8 +50,13 @@ export function LandingPage() {
       <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-5">
           <Link to="/" className="flex items-center gap-3">
-            <span className="block h-4 w-4 rotate-45 border border-primary/70 bg-primary/10" aria-hidden />
-            <span className="text-sm font-medium uppercase tracking-[0.34em] text-foreground">Sanctuary</span>
+            <span
+              className="block h-4 w-4 rotate-45 border border-primary/70 bg-primary/10"
+              aria-hidden
+            />
+            <span className="text-sm font-medium uppercase tracking-[0.34em] text-foreground">
+              Sanctuary
+            </span>
           </Link>
           <a
             href={whatsAppDemoLink}
@@ -60,7 +73,10 @@ export function LandingPage() {
       <main>
         {/* Hero */}
         <section className="relative overflow-hidden">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-primary/25" aria-hidden />
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 h-px bg-primary/25"
+            aria-hidden
+          />
           <div className="mx-auto flex max-w-4xl flex-col items-center px-4 py-16 text-center sm:px-5 sm:py-24 md:py-36">
             <p className="animate-rise font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
               Private Cognitive Reset Protocols
@@ -91,7 +107,8 @@ export function LandingPage() {
             </div>
 
             <p className="mt-8 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
-              <Lock className="size-3.5" aria-hidden /> Private by design · No public profiles
+              <Lock className="size-3.5" aria-hidden /> Private by design · No
+              public profiles
             </p>
           </div>
         </section>
@@ -105,31 +122,45 @@ export function LandingPage() {
                   What Sanctuary is
                 </h2>
                 <p className="mt-6 font-display text-2xl font-normal italic leading-snug text-foreground sm:text-3xl tracking-tight">
-                  Not a wellness app. A performance instrument for acute stress recovery.
+                  Not a wellness app. A performance instrument for acute stress
+                  recovery.
                 </p>
               </div>
               <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
-                Sanctuary is a private, executive-grade protocol system for leaders who need to recover composure
-                quickly — before a board vote, between depositions, before a hostile negotiation, or during a brand
-                crisis. Each protocol is a timed sequence of breath, posture, voice, and focus instructions built to
-                down-regulate the acute stress response and restore decision quality in under five minutes.
+                Sanctuary is a private, executive-grade protocol system for
+                leaders who need to recover composure quickly — before a board
+                vote, between depositions, before a hostile negotiation, or
+                during a brand crisis. Each protocol is a timed sequence of
+                breath, posture, voice, and focus instructions built to
+                down-regulate the acute stress response and restore decision
+                quality in under five minutes.
               </p>
             </div>
           </div>
         </section>
 
         {/* Capabilities */}
-        <section className="border-t border-border" aria-labelledby="capabilities">
+        <section
+          className="border-t border-border"
+          aria-labelledby="capabilities"
+        >
           <div className="mx-auto max-w-6xl px-4 py-12 sm:px-5 sm:py-20">
             <h2 id="capabilities" className="eyebrow">
               Capabilities
             </h2>
             <div className="mt-8 grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
               {features.map((f) => (
-                <div key={f.title} className="panel-surface rounded-md p-6 sm:p-7">
+                <div
+                  key={f.title}
+                  className="panel-surface rounded-md p-6 sm:p-7"
+                >
                   <f.icon className="size-5 text-primary" aria-hidden />
-                  <h3 className="mt-6 text-lg font-medium tracking-tight">{f.title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{f.body}</p>
+                  <h3 className="mt-6 text-lg font-medium tracking-tight">
+                    {f.title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                    {f.body}
+                  </p>
                 </div>
               ))}
             </div>
@@ -153,7 +184,10 @@ export function LandingPage() {
                 "High-stakes litigation",
                 "Executive transitions",
               ].map((item) => (
-                <li key={item} className="bg-panel px-5 py-4 text-sm text-muted-foreground">
+                <li
+                  key={item}
+                  className="bg-panel px-5 py-4 text-sm text-muted-foreground"
+                >
                   {item}
                 </li>
               ))}
@@ -162,15 +196,23 @@ export function LandingPage() {
         </section>
 
         {/* Testimonials */}
-        <section className="border-t border-border" aria-labelledby="testimonials">
+        <section
+          className="border-t border-border"
+          aria-labelledby="testimonials"
+        >
           <div className="mx-auto max-w-6xl px-4 py-12 sm:px-5 sm:py-20">
             <h2 id="testimonials" className="eyebrow">
               Field notes
             </h2>
             <div className="mt-8 grid gap-4 sm:gap-5 md:grid-cols-3">
               {testimonials.map((t) => (
-                <figure key={t.attr} className="rounded-md border border-border p-6 sm:p-7">
-                  <blockquote className="text-base leading-relaxed text-foreground">“{t.quote}”</blockquote>
+                <figure
+                  key={t.attr}
+                  className="rounded-md border border-border p-6 sm:p-7"
+                >
+                  <blockquote className="text-base leading-relaxed text-foreground">
+                    “{t.quote}”
+                  </blockquote>
                   <figcaption className="mt-5 text-xs uppercase tracking-[0.18em] text-muted-foreground">
                     {t.attr}
                   </figcaption>
@@ -190,8 +232,10 @@ export function LandingPage() {
               See Sanctuary in action.
             </p>
             <p className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-              Book a short, confidential demo. We'll walk you through the protocol system, discuss deployment options for
-              your organization, and answer any questions about privacy and enterprise customization.
+              Book a short, confidential demo. We'll walk you through the
+              protocol system, discuss deployment options for your organization,
+              and answer any questions about privacy and enterprise
+              customization.
             </p>
             <div className="mt-10 flex justify-center">
               <a
@@ -217,11 +261,17 @@ export function LandingPage() {
       <footer className="border-t border-border bg-panel">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 sm:px-5 md:flex-row">
           <div className="flex items-center gap-3">
-            <span className="block h-3.5 w-3.5 rotate-45 border border-primary/70 bg-primary/10" aria-hidden />
-            <span className="text-sm uppercase tracking-[0.34em]">Sanctuary</span>
+            <span
+              className="block h-3.5 w-3.5 rotate-45 border border-primary/70 bg-primary/10"
+              aria-hidden
+            />
+            <span className="text-sm uppercase tracking-[0.34em]">
+              Sanctuary
+            </span>
           </div>
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Sanctuary. Private cognitive reset protocols.
+            © {new Date().getFullYear()} Sanctuary. Private cognitive reset
+            protocols.
           </p>
           <Link
             to="/"

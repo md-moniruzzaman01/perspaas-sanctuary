@@ -2,9 +2,9 @@ import { getRouteApi, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
+import { apiFetch } from "@/lib/api";
 
 const route = getRouteApi("/reset-password");
-const API_URL = import.meta.env["VITE_API_URL"] ?? "http://localhost:4000";
 
 type Status = "checking" | "ready" | "invalid";
 
@@ -25,8 +25,8 @@ export function ResetPasswordPage() {
     e.preventDefault();
     setError(null);
 
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+    if (password.length < 8 || password.length > 20) {
+      setError("Password must be between 8 and 20 characters.");
       return;
     }
     if (password !== confirmPassword) {
@@ -40,7 +40,7 @@ export function ResetPasswordPage() {
 
     setSaving(true);
     try {
-      const res = await fetch(`${API_URL}/api/auth/reset-password`, {
+      const res = await apiFetch("/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, newPassword: password }),
@@ -100,9 +100,10 @@ export function ResetPasswordPage() {
                     type="password"
                     required
                     minLength={8}
+                    maxLength={20}
                     autoComplete="new-password"
                     autoFocus
-                    placeholder="New password"
+                    placeholder="New password (8–20 characters)"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full rounded-md border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
@@ -111,6 +112,7 @@ export function ResetPasswordPage() {
                     type="password"
                     required
                     minLength={8}
+                    maxLength={20}
                     autoComplete="new-password"
                     placeholder="Confirm new password"
                     value={confirmPassword}

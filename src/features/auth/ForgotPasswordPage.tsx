@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
-
-const API_URL = import.meta.env["VITE_API_URL"] ?? "http://localhost:4000";
+import { apiFetch } from "@/lib/api";
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -16,7 +15,7 @@ export function ForgotPasswordPage() {
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/auth/forgot-password`, {
+      const res = await apiFetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, app: "sanctuary" }),
